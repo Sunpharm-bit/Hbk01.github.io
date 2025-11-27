@@ -488,6 +488,15 @@
             padding: 20px;
             color: #3498db;
         }
+        
+        .error-container {
+            text-align: center;
+            padding: 20px;
+            background: #f8d7da;
+            color: #721c24;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -630,27 +639,101 @@
 
         // 加载词汇数据
         function loadVocabularyData() {
-            fetch('../info/English.json')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('网络响应不正常');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    labVocabulary = data;
-                    // 隐藏加载提示
-                    document.getElementById('dataLoading').style.display = 'none';
-                    // 初始化分类标签
-                    initCategoryTabs();
-                    // 初始化常用词汇列表
-                    initHistoryList();
-                })
-                .catch(error => {
-                    console.error('加载词汇数据失败:', error);
-                    document.getElementById('dataLoading').innerHTML = 
-                        '<div class="no-result">词汇数据加载失败，请检查网络连接或文件路径</div>';
-                });
+            // 尝试多种可能的文件路径
+            const possiblePaths = [
+                '../info/English.json',
+                'info/English.json',
+                './info/English.json',
+                '/info/English.json'
+            ];
+            
+            let currentPathIndex = 0;
+            
+            function tryLoadNextPath() {
+                if (currentPathIndex >= possiblePaths.length) {
+                    // 所有路径都尝试过了，显示错误
+                    showDataLoadError();
+                    return;
+                }
+                
+                const path = possiblePaths[currentPathIndex];
+                console.log(`尝试加载数据从: ${path}`);
+                
+                fetch(path)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`网络响应不正常: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('成功加载数据:', data);
+                        processVocabularyData(data);
+                    })
+                    .catch(error => {
+                        console.error(`从 ${path} 加载词汇数据失败:`, error);
+                        currentPathIndex++;
+                        tryLoadNextPath();
+                    });
+            }
+            
+            function showDataLoadError() {
+                document.getElementById('dataLoading').innerHTML = 
+                    '<div class="error-container">词汇数据加载失败，请检查网络连接或文件路径</div>';
+            }
+            
+            tryLoadNextPath();
+        }
+
+        // 处理词汇数据
+        function processVocabularyData(data) {
+            // 检查数据结构并转换为标准格式
+            if (Array.isArray(data)) {
+                // 如果是数组，将其转换为分类格式
+                labVocabulary = convertArrayToCategorized(data);
+            } else if (typeof data === 'object' && data !== null) {
+                // 如果是对象，直接使用
+                labVocabulary = data;
+            } else {
+                throw new Error('数据格式不正确');
+            }
+            
+            // 隐藏加载提示
+            document.getElementById('dataLoading').style.display = 'none';
+            // 初始化分类标签
+            initCategoryTabs();
+            // 初始化常用词汇列表
+            initHistoryList();
+            
+            // 显示成功加载的消息
+            const resultElement = document.getElementById('translationResult');
+            resultElement.innerHTML = '<div class="no-result">数据加载成功！请输入关键词开始查询</div>';
+            resultElement.classList.add('active');
+        }
+
+        // 将数组转换为分类格式
+        function convertArrayToCategorized(dataArray) {
+            const categorized = {};
+            
+            dataArray.forEach(item => {
+                // 尝试从不同属性名获取分类信息
+                const category = item.category || item.type || item.分类 || '默认分类';
+                const chinese = item.chinese || item.中文 || item.zh || item.name || '';
+                const english = item.english || item.英文 || item.en || item.value || '';
+                
+                if (!categorized[category]) {
+                    categorized[category] = [];
+                }
+                
+                if (chinese && english) {
+                    categorized[category].push({
+                        chinese: chinese,
+                        english: english
+                    });
+                }
+            });
+            
+            return categorized;
         }
 
         // 初始化分类标签
@@ -704,14 +787,21 @@
                 words = labVocabulary[category] || [];
             }
             
+            // 如果没有词汇，显示提示
+            if (words.length === 0) {
+                historyList.innerHTML = '<div class="no-result">该分类下暂无词汇</div>';
+                return;
+            }
+            
             // 随机选择10个词汇显示
-            const shuffled = words.sort(() => 0.5 - Math.random());
+            const shuffled = [...words].sort(() => 0.5 - Math.random());
             const selectedWords = shuffled.slice(0, 10);
             
             selectedWords.forEach(word => {
                 const item = document.createElement('div');
                 item.className = 'history-item';
                 item.textContent = word.chinese;
+                item.title = word.english; // 鼠标悬停显示英文
                 item.addEventListener('click', () => {
                     document.getElementById('searchInput').value = word.chinese;
                     performSearch();
@@ -737,6 +827,13 @@
                 return;
             }
             
+            // 检查数据是否已加载
+            if (Object.keys(labVocabulary).length === 0) {
+                resultElement.innerHTML = '<div class="no-result">词汇数据尚未加载，请稍后再试</div>';
+                resultElement.classList.add('active');
+                return;
+            }
+            
             let results = [];
             
             // 根据搜索类型进行查询
@@ -744,7 +841,7 @@
                 // 搜索中文
                 Object.entries(labVocabulary).forEach(([category, words]) => {
                     words.forEach(word => {
-                        if (word.chinese.includes(query)) {
+                        if (word.chinese && word.chinese.includes(query)) {
                             results.push({ ...word, category });
                         }
                     });
@@ -755,8 +852,11 @@
                 // 搜索英文
                 Object.entries(labVocabulary).forEach(([category, words]) => {
                     words.forEach(word => {
-                        if (word.english.toLowerCase().includes(query.toLowerCase())) {
-                            results.push({ ...word, category });
+                        if (word.english && word.english.toLowerCase().includes(query.toLowerCase())) {
+                            // 避免重复添加
+                            if (!results.some(r => r.chinese === word.chinese && r.english === word.english)) {
+                                results.push({ ...word, category });
+                            }
                         }
                     });
                 });
