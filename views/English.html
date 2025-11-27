@@ -86,9 +86,6 @@
             padding-bottom: 8px;
             border-bottom: 1px solid #eaecef;
             position: relative;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
         
         .section-title::after {
@@ -99,21 +96,6 @@
             width: 60px;
             height: 2px;
             background: #3498db;
-        }
-        
-        .refresh-btn {
-            background: #2ecc71;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 6px 12px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: background 0.3s;
-        }
-        
-        .refresh-btn:hover, .refresh-btn:active {
-            background: #27ae60;
         }
         
         .search-box {
@@ -226,7 +208,7 @@
         }
         
         .history-section {
-            margin-bottom: 25px;
+            margin-top: 25px;
         }
         
         .history-list {
@@ -488,15 +470,6 @@
             padding: 20px;
             color: #3498db;
         }
-        
-        .error-container {
-            text-align: center;
-            padding: 20px;
-            background: #f8d7da;
-            color: #721c24;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
     </style>
 </head>
 <body>
@@ -537,17 +510,6 @@
             
             <div class="translation-result" id="translationResult">
                 <div class="data-loading" id="dataLoading">正在加载词汇数据...</div>
-            </div>
-            
-            <!-- 将常用词汇部分移到在线翻译上面 -->
-            <div class="history-section">
-                <h2 class="section-title">
-                    常用实验室词汇
-                    <button class="refresh-btn" id="refreshBtn">刷新词汇</button>
-                </h2>
-                <div class="history-list" id="historyList">
-                    <!-- 常用词汇将动态填充 -->
-                </div>
             </div>
             
             <h2 class="section-title">在线翻译</h2>
@@ -598,6 +560,13 @@
                 <div class="error-message" id="errorMessage"></div>
             </div>
             
+            <div class="history-section">
+                <h2 class="section-title">常用实验室词汇</h2>
+                <div class="history-list" id="historyList">
+                    <!-- 常用词汇将动态填充 -->
+                </div>
+            </div>
+            
             <div style="text-align: center; margin-top: 20px;">
                 <a href="../index.html" class="back-btn">返回主页面</a>
             </div>
@@ -611,7 +580,6 @@
     <script>
         // 全局变量存储实验室词汇数据
         let labVocabulary = {};
-        let currentCategory = 'all';
 
         // 初始化页面
         document.addEventListener('DOMContentLoaded', function() {
@@ -620,7 +588,6 @@
             
             // 事件监听
             document.getElementById('searchBtn').addEventListener('click', performSearch);
-            document.getElementById('refreshBtn').addEventListener('click', refreshHistory);
             
             document.getElementById('searchInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
@@ -639,101 +606,27 @@
 
         // 加载词汇数据
         function loadVocabularyData() {
-            // 尝试多种可能的文件路径
-            const possiblePaths = [
-                '../info/English.json',
-                'info/English.json',
-                './info/English.json',
-                '/info/English.json'
-            ];
-            
-            let currentPathIndex = 0;
-            
-            function tryLoadNextPath() {
-                if (currentPathIndex >= possiblePaths.length) {
-                    // 所有路径都尝试过了，显示错误
-                    showDataLoadError();
-                    return;
-                }
-                
-                const path = possiblePaths[currentPathIndex];
-                console.log(`尝试加载数据从: ${path}`);
-                
-                fetch(path)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`网络响应不正常: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('成功加载数据:', data);
-                        processVocabularyData(data);
-                    })
-                    .catch(error => {
-                        console.error(`从 ${path} 加载词汇数据失败:`, error);
-                        currentPathIndex++;
-                        tryLoadNextPath();
-                    });
-            }
-            
-            function showDataLoadError() {
-                document.getElementById('dataLoading').innerHTML = 
-                    '<div class="error-container">词汇数据加载失败，请检查网络连接或文件路径</div>';
-            }
-            
-            tryLoadNextPath();
-        }
-
-        // 处理词汇数据
-        function processVocabularyData(data) {
-            // 检查数据结构并转换为标准格式
-            if (Array.isArray(data)) {
-                // 如果是数组，将其转换为分类格式
-                labVocabulary = convertArrayToCategorized(data);
-            } else if (typeof data === 'object' && data !== null) {
-                // 如果是对象，直接使用
-                labVocabulary = data;
-            } else {
-                throw new Error('数据格式不正确');
-            }
-            
-            // 隐藏加载提示
-            document.getElementById('dataLoading').style.display = 'none';
-            // 初始化分类标签
-            initCategoryTabs();
-            // 初始化常用词汇列表
-            initHistoryList();
-            
-            // 显示成功加载的消息
-            const resultElement = document.getElementById('translationResult');
-            resultElement.innerHTML = '<div class="no-result">数据加载成功！请输入关键词开始查询</div>';
-            resultElement.classList.add('active');
-        }
-
-        // 将数组转换为分类格式
-        function convertArrayToCategorized(dataArray) {
-            const categorized = {};
-            
-            dataArray.forEach(item => {
-                // 尝试从不同属性名获取分类信息
-                const category = item.category || item.type || item.分类 || '默认分类';
-                const chinese = item.chinese || item.中文 || item.zh || item.name || '';
-                const english = item.english || item.英文 || item.en || item.value || '';
-                
-                if (!categorized[category]) {
-                    categorized[category] = [];
-                }
-                
-                if (chinese && english) {
-                    categorized[category].push({
-                        chinese: chinese,
-                        english: english
-                    });
-                }
-            });
-            
-            return categorized;
+            fetch('../info/lab-vocabulary.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('网络响应不正常');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    labVocabulary = data;
+                    // 隐藏加载提示
+                    document.getElementById('dataLoading').style.display = 'none';
+                    // 初始化分类标签
+                    initCategoryTabs();
+                    // 初始化常用词汇列表
+                    initHistoryList();
+                })
+                .catch(error => {
+                    console.error('加载词汇数据失败:', error);
+                    document.getElementById('dataLoading').innerHTML = 
+                        '<div class="no-result">词汇数据加载失败，请检查网络连接或文件路径</div>';
+                });
         }
 
         // 初始化分类标签
@@ -749,7 +642,6 @@
             allTab.addEventListener('click', function() {
                 document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
                 this.classList.add('active');
-                currentCategory = 'all';
                 initHistoryList();
             });
             categoryTabs.appendChild(allTab);
@@ -763,7 +655,6 @@
                 tab.addEventListener('click', function() {
                     document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
                     this.classList.add('active');
-                    currentCategory = category;
                     initHistoryList(category);
                 });
                 categoryTabs.appendChild(tab);
@@ -771,7 +662,7 @@
         }
 
         // 初始化常用词汇列表
-        function initHistoryList(category = currentCategory) {
+        function initHistoryList(category = 'all') {
             const historyList = document.getElementById('historyList');
             historyList.innerHTML = '';
             
@@ -780,39 +671,27 @@
             if (category === 'all') {
                 // 获取所有分类的词汇
                 Object.values(labVocabulary).forEach(categoryWords => {
-                    words = words.concat(categoryWords);
+                    words = words.concat(categoryWords.slice(0, 5)); // 每个分类取前5个
                 });
             } else {
                 // 获取指定分类的词汇
                 words = labVocabulary[category] || [];
             }
             
-            // 如果没有词汇，显示提示
-            if (words.length === 0) {
-                historyList.innerHTML = '<div class="no-result">该分类下暂无词汇</div>';
-                return;
-            }
-            
             // 随机选择10个词汇显示
-            const shuffled = [...words].sort(() => 0.5 - Math.random());
+            const shuffled = words.sort(() => 0.5 - Math.random());
             const selectedWords = shuffled.slice(0, 10);
             
             selectedWords.forEach(word => {
                 const item = document.createElement('div');
                 item.className = 'history-item';
                 item.textContent = word.chinese;
-                item.title = word.english; // 鼠标悬停显示英文
                 item.addEventListener('click', () => {
                     document.getElementById('searchInput').value = word.chinese;
                     performSearch();
                 });
                 historyList.appendChild(item);
             });
-        }
-
-        // 刷新常用词汇
-        function refreshHistory() {
-            initHistoryList(currentCategory);
         }
 
         // 执行搜索
@@ -827,13 +706,6 @@
                 return;
             }
             
-            // 检查数据是否已加载
-            if (Object.keys(labVocabulary).length === 0) {
-                resultElement.innerHTML = '<div class="no-result">词汇数据尚未加载，请稍后再试</div>';
-                resultElement.classList.add('active');
-                return;
-            }
-            
             let results = [];
             
             // 根据搜索类型进行查询
@@ -841,7 +713,7 @@
                 // 搜索中文
                 Object.entries(labVocabulary).forEach(([category, words]) => {
                     words.forEach(word => {
-                        if (word.chinese && word.chinese.includes(query)) {
+                        if (word.chinese.includes(query)) {
                             results.push({ ...word, category });
                         }
                     });
@@ -852,11 +724,8 @@
                 // 搜索英文
                 Object.entries(labVocabulary).forEach(([category, words]) => {
                     words.forEach(word => {
-                        if (word.english && word.english.toLowerCase().includes(query.toLowerCase())) {
-                            // 避免重复添加
-                            if (!results.some(r => r.chinese === word.chinese && r.english === word.english)) {
-                                results.push({ ...word, category });
-                            }
+                        if (word.english.toLowerCase().includes(query.toLowerCase())) {
+                            results.push({ ...word, category });
                         }
                     });
                 });
@@ -923,11 +792,11 @@
             // 使用简单的模拟翻译，避免跨域问题
             setTimeout(() => {
                 if (fromLang === 'zh-CHS' && toLang === 'en') {
-                    outputText.value = "Translation: " + inputText;
+                    outputText.value = "Translation: " + inputText + " [This is a simulated translation. For full functionality, deploy to a web server.]";
                 } else if (fromLang === 'en' && toLang === 'zh-CHS') {
-                    outputText.value = "翻译结果: " + inputText;
+                    outputText.value = "翻译结果: " + inputText + " [这是一个模拟翻译。如需完整功能，请部署到Web服务器。]";
                 } else {
-                    outputText.value = "Translation: " + inputText;
+                    outputText.value = "Translation: " + inputText + " [Simulated translation between " + fromLang + " and " + toLang + "]";
                 }
                 loadingIndicator.classList.remove('active');
             }, 1000);
