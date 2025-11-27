@@ -399,12 +399,28 @@
         </section>
 
         <footer>
-            <p>仪器/对照品效期查询系统 &copy; 2025 实验室数据管理系统</p>
+            <p>仪器/对照品效期查询系统 &copy; 2023 实验室管理系统</p>
         </footer>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        // 模拟数据 - 在实际应用中应从JSON文件加载
+        const deviceData = [
+            { id: "DEV001", name: "高效液相色谱仪", expir: "2023.12.31", where: "实验室A" },
+            { id: "DEV002", name: "紫外分光光度计", expir: "2023.11.15", where: "实验室B" },
+            { id: "DEV003", name: "分析天平", expir: "2024.03.20", where: "实验室A" },
+            { id: "DEV004", name: "pH计", expir: "2023.10.05", where: "实验室C" },
+            { id: "DEV005", name: "离心机", expir: "2024.01.30", where: "实验室B" }
+        ];
+
+        const standardData = [
+            { batch: "STD2023001", name: "阿莫西林", source: "中国药品生物制品检定所", expir: "2024.05.10", kind: "化学对照品" },
+            { batch: "STD2023002", name: "头孢曲松", source: "USP", expir: "2023.11.30", kind: "化学对照品" },
+            { batch: "STD2023003", name: "胰岛素", source: "EP", expir: "2023.10.20", kind: "生物制品对照品" },
+            { batch: "STD2023004", name: "维生素C", source: "中国药品生物制品检定所", expir: "2024.08.15", kind: "化学对照品" },
+            { batch: "STD2023005", name: "布洛芬", source: "USP", expir: "2023.12.25", kind: "化学对照品" }
+        ];
 
         let info = {
             device: deviceData,
@@ -512,11 +528,11 @@
         }
 
         function createDeviceTable(data) {
-            return createTable(data, `设备信息（${data.length}条）`, ["名称", "编号", "有效期至", "位置"], ["where"]);
+            return createTable(data, `设备信息（${data.length}条）`, ["名称", "编号", "位置", "有效期至"], ["where"]);
         }
 
         function createStandardTable(data) {
-            return createTable(data, `对照品信息（${data.length}条）`, ["名称", "批号", "有效期至", "来源"], ["kind"]);
+            return createTable(data, `对照品信息（${data.length}条）`, ["名称", "批号", "来源", "有效期至"], ["kind"]);
         }
 
         function createTable(data, captionText, headers, hiddenFields = []) {
