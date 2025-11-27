@@ -5,72 +5,402 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>进样时间</title>
+    <title>进样时间计算器</title>
     <link rel="stylesheet" href="../statics/github.css">
     <link rel="stylesheet" href="../statics/theme.css">
+    <link rel="stylesheet" href="../statics/column.css">
     <script src="../statics/modules/dayjs.min.js"></script>
     <script src="../statics/modules/jquery.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --light-color: #f8f9fa;
+            --border-color: #dee2e6;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f7fa;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+        
+        .input-section {
+            flex: 1;
+            min-width: 300px;
+            padding-right: 20px;
+        }
+        
+        .result-section {
+            flex: 1;
+            min-width: 300px;
+            border-left: 1px solid var(--border-color);
+            padding-left: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+        
+        input[type="number"],
+        input[type="date"],
+        input[type="time"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        input[type="number"]:focus,
+        input[type="date"]:focus,
+        input[type="time"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-group input {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        
+        .radio-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .radio-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            transition: all 0.3s;
+        }
+        
+        .radio-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .radio-item input {
+            margin-right: 8px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #ok {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        #ok:hover {
+            background-color: #2980b9;
+        }
+        
+        #clear {
+            background-color: #95a5a6;
+            color: white;
+        }
+        
+        #clear:hover {
+            background-color: #7f8c8d;
+        }
+        
+        #new_page {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        #new_page:hover {
+            background-color: #c0392b;
+        }
+        
+        .result-container {
+            margin-top: 20px;
+        }
+        
+        .info-box {
+            background-color: #e8f4fd;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+        
+        tr.highlight {
+            background-color: #fff3cd;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .input-section, .result-section {
+                padding: 0;
+                border-left: none;
+            }
+            
+            .result-section {
+                margin-top: 20px;
+            }
+            
+            .radio-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>液相进样时间推算</h1>
+            <p class="subtitle">预估批处理中每一针样品的运行时间，支持多种仪器类型</p>
+        </header>
+        
+        <div class="main-content">
+            <section class="input-section">
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="useSystemClock" checked>
+                        <label for="useSystemClock">使用系统当前时间</label>
+                    </div>
+                    
+                    <div id="customTimeGroup" class="hidden">
+                        <div style="display: flex; gap: 10px;">
+                            <div style="flex: 1;">
+                                <label for="nowDate">当前日期</label>
+                                <input type="date" id="nowDate">
+                            </div>
+                            <div style="flex: 1;">
+                                <label for="nowTime">当前时间</label>
+                                <input type="time" id="nowTime">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="allId">样品总数</label>
+                    <input type="number" id="allId" inputmode="decimal" autocomplete="off" placeholder="输入总样品数量">
+                </div>
+                
+                <div class="form-group">
+                    <label for="time">单针运行时间（分钟）</label>
+                    <input type="number" id="time" inputmode="decimal" autocomplete="off" placeholder="输入每针运行时间">
+                </div>
+                
+                <div class="form-group">
+                    <label for="nowId">当前运行到第几针</label>
+                    <input type="number" id="nowId" inputmode="decimal" autocomplete="off" placeholder="输入当前针数">
+                </div>
+                
+                <div class="form-group">
+                    <label for="nowRunTime">当前针已运行时间（分钟）</label>
+                    <input type="number" id="nowRunTime" inputmode="decimal" autocomplete="off" placeholder="输入当前针已运行时间">
+                </div>
+                
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="offset" checked>
+                        <label for="offset">启用时间补偿</label>
+                    </div>
+                    
+                    <div id="offsetGroup">
+                        <label>选择仪器类型</label>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio" value="24" name="offset_type" id="shimadzu" checked>
+                                <label for="shimadzu">岛津</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" value="84" name="offset_type" id="agilent">
+                                <label for="agilent">安捷伦</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" value="60" name="offset_type" id="waters">
+                                <label for="waters">沃特世</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" value="60" name="offset_type" id="thermo">
+                                <label for="thermo">赛默飞</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="buttons">
+                    <button id="new_page">新开标签页</button>
+                    <button id="clear">清除内容</button>
+                    <button id="ok">计算</button>
+                </div>
+            </section>
+            
+            <section class="result-section">
+                <h2>计算结果</h2>
+                <div class="info-box">
+                    <p>此功能用于预估批处理中每一针样品运行的时间。</p>
+                    <p>仪器进样需要时间，不同仪器所需时间也不同。时间补偿功能可尽量校正该误差。</p>
+                </div>
+                <div id="output" class="result-container">
+                    <!-- 计算结果将在这里显示 -->
+                </div>
+            </section>
+        </div>
+    </div>
+
     <script type="module">
+        // 导入Decimal模块
         import { Decimal } from "../statics/modules/decimal.mjs"
 
+        // 设置Decimal配置
         const decimal = Decimal.set({
             rounding: Decimal.ROUND_HALF_EVEN,
             precision: 12
         })
 
         $(document).ready(() => {
-            let tip = `
-            <p>此功能用于计算批处理中每一针样品运行的时间。</p>
-            <p>此功能以当前运行样品的时间为起点，再向前或向后计算其他针的时间。</p>
-            <p>仪器进样需要时间，而仪器不同，进样所需时间也不同，因此该部分时间无法准确计算。
-                且该部分时间会随样品总数增多而积累，按此功能的算法，越远离当前运行的样品，则误差越大。</p>
-            <p>误差不可避免，但勾选<span style="background-color: black;color: white">时间补偿</span>可尽量校正该误差。</p>
-            `
-            $("#output").append(tip)
-
-            // 默认选中时间补偿
+            // 初始化变量
             let offset = true
-            // 默认岛津的时间补偿为 24 秒
             let offsetSecond = 24
-            // 默认使用系统时间
             let useSystemClock = true
 
-            // 默认使用系统时间，隐藏当前时间和日期的输入框
-            $(".nowDate").hide()
-            $(".nowTime").hide()
+            // 初始隐藏自定义时间输入
+            $("#customTimeGroup").addClass("hidden")
 
-            // 注册使用系统时间的事件监听器
+            // 使用系统时间的事件监听器
             $("#useSystemClock").on("change", function () {
                 useSystemClock = $(this).is(":checked")
                 if (useSystemClock) {
-                    $(".nowDate").hide()
-                    $(".nowTime").hide()
+                    $("#customTimeGroup").addClass("hidden")
                 } else {
-                    $(".nowDate").show()
-                    $(".nowTime").show()
-                    $("#nowDate").val(new Date().format("yyyy-MM-dd"))
-                    $("#nowTime").val(new Date().format("hh:mm:ss"))
+                    $("#customTimeGroup").removeClass("hidden")
+                    // 设置默认值为当前时间
+                    const now = new Date()
+                    $("#nowDate").val(now.format("yyyy-MM-dd"))
+                    $("#nowTime").val(now.format("hh:mm"))
                 }
             })
 
-            // 注册时间补偿的事件监听器
+            // 时间补偿的事件监听器
             $("#offset").on("change", function () {
                 offset = $(this).is(":checked")
                 if (offset) {
-                    $(".offset_type").show()
+                    $("#offsetGroup").show()
                     offsetSecond = $("input[name='offset_type']:checked").val()
                 } else {
-                    $(".offset_type").hide()
+                    $("#offsetGroup").hide()
                     offsetSecond = 0
                 }
             })
 
-            // 注册仪器类型的事件监听器，选择不同的仪器，时间补偿也会不同
-            $(".offset_type").on("change", function () {
-                offsetSecond = $("input[name='offset_type']:checked").val()
+            // 仪器类型的事件监听器
+            $("input[name='offset_type']").on("change", function () {
+                offsetSecond = $(this).val()
             })
 
+            // 计算按钮点击事件
             $("#ok").click(() => {
+                // 获取输入值
                 let nowDate = $("#nowDate").val()
                 let nowTime = $("#nowTime").val()
                 let allId = new Decimal($("#allId").val()).toNumber()
@@ -78,11 +408,18 @@
                 let time = new Decimal($("#time").val()).toNumber()
                 let nowRunTime = new Decimal($("#nowRunTime").val()).toNumber()
 
+                // 输入验证
+                if (!validateInputs(allId, nowId, time, nowRunTime)) {
+                    return
+                }
+
                 let data = []
 
+                // 使用系统时间
                 if ($("#useSystemClock").is(":checked")) {
-                    nowDate = new Date().format("yyyy-MM-dd")
-                    nowTime = new Date().format("hh:mm:ss")
+                    const now = new Date()
+                    nowDate = now.format("yyyy-MM-dd")
+                    nowTime = now.format("hh:mm:ss")
                 }
 
                 // 生成数据
@@ -99,11 +436,14 @@
                 // 未生成数据，不进行结果展示
                 if (data.length == 0) return
 
+                // 显示结果
                 $("#output").empty()
                 $("#output").append(createTable(data))
             })
 
+            // 清除按钮点击事件
             $("#clear").click(() => {
+                // 重置输入
                 $("#nowDate").val(new Date().format("yyyy-MM-dd"))
                 $("#nowTime").val(new Date().format("hh:mm"))
                 $("#allId").val("")
@@ -111,25 +451,51 @@
                 $("#time").val("")
                 $("#nowRunTime").val("")
                 $("#output").empty()
-                $("#output").append(tip)
+                
+                // 显示提示信息
+                const infoBox = $('<div class="info-box"><p>请输入参数并点击"计算"按钮查看结果。</p></div>')
+                $("#output").append(infoBox)
             })
 
+            // 新开标签页按钮点击事件
             $("#new_page").click(() => {
                 window.open(window.location.href, "_blank")
             })
+            
+            // 初始显示提示信息
+            const infoBox = $('<div class="info-box"><p>请输入参数并点击"计算"按钮查看结果。</p></div>')
+            $("#output").append(infoBox)
         })
 
         /**
+         * 验证输入数据
+         */
+        function validateInputs(allId, nowId, time, nowRunTime) {
+            if (!allId || allId <= 0) {
+                alert("请输入有效的样品总数")
+                return false
+            }
+            
+            if (!nowId || nowId <= 0 || nowId > allId) {
+                alert("请输入有效的当前针数，应在1到样品总数之间")
+                return false
+            }
+            
+            if (!time || time <= 0) {
+                alert("请输入有效的运行时间")
+                return false
+            }
+            
+            if (!nowRunTime || nowRunTime < 0 || nowRunTime > time) {
+                alert("请输入有效的当前运行时间，应在0到运行时间之间")
+                return false
+            }
+            
+            return true
+        }
+
+        /**
          * 生成数据
-         * @author <a href="mailto:3243430237@qq.com" target="_blank">hbk01</a>
-         * @param {String} nowDate 当前日期，yyyy-MM-dd
-         * @param {String} nowTime 当前时间，hh:mm:ss
-         * @param {Number} allId 总针数（即需要计算多少条数据）
-         * @param {Number} nowId 当前针数（当前仪器运行到第几针）
-         * @param {Number} time 一针有多少分钟（包括后运行）
-         * @param {Number} nowRunTime 当前这针已经运行了多少分钟
-         * @param {Number} offsetSecond 每一针需偏移多少秒，不同的仪器会有不同偏移量，默认为岛津的 24 秒，
-         * @return {Array} 保存了 dayjs 对象的数组，每一个元素代表一针的开始时间
          */
         function genData(nowDate, nowTime, allId, nowId, time, nowRunTime, offsetSecond) {
             let array = new Array(allId)
@@ -149,13 +515,12 @@
         }
 
         /**
-         * 创建表格元素并将数据填入其中。
+         * 创建表格元素并将数据填入其中
          */
         function createTable(data) {
             let nowId = new Decimal($("#nowId").val()).toNumber()
 
             let table = document.createElement("table")
-            table.setAttribute("style", "width: 100%; text-align: center; font-size: smaller;")
             table.setAttribute("class", "pure-table")
 
             let row = document.createElement("tr")
@@ -169,7 +534,7 @@
             row.appendChild(startTime)
             row.appendChild(endTime)
             table.appendChild(row)
-            let highlight = 'background-color: #ffffcc;'
+            
             data.forEach(element => {
                 let tr = document.createElement("tr")
                 let td_id = document.createElement("td")
@@ -180,7 +545,7 @@
                 td_start_time.innerText = element.startTime
                 td_end_time.innerText = element.endTime
 
-                if (element.id == nowId) tr.style = highlight
+                if (element.id == nowId) tr.classList.add("highlight")
 
                 tr.appendChild(td_id)
                 tr.appendChild(td_start_time)
@@ -211,222 +576,7 @@
             }
             return fmt
         }
-
     </script>
-
-    <style>
-        .inputbox {
-            display: flex;
-            display: -webkit-flex;
-            line-height: 32px;
-            border: 1px solid black;
-            border-radius: 5px;
-            justify-content: center;
-            align-items: baseline;
-            margin-bottom: 5px;
-        }
-
-        .inputbox label {
-            line-height: 32px;
-            font-size: small;
-            color: #777;
-            margin-left: 10px;
-            margin-right: 10px;
-        }
-
-        .inputbox div {
-            flex: 1;
-        }
-
-        .inputbox input {
-            /* 需设置宽度，否则 iOS 端的 Safari 无法正确显示 div.inputbox 的右边框 */
-            width: calc(100% - 20px);
-            /* 取消边框 */
-            border: none;
-            /* 取消选中时的边框高亮 */
-            outline: none;
-            margin: 0;
-            font-size: medium;
-            line-height: 32px;
-        }
-
-        .offset {
-            display: flex;
-            display: -webkit-flex;
-            margin-bottom: 5px;
-            align-items: center;
-            line-height: 32px;
-        }
-
-        .offset label {
-            width: 100%;
-            line-height: 32px;
-            padding-left: 5px;
-        }
-
-        #offset {
-            width: 20px;
-        }
-
-        fieldset {
-            display: flex;
-            display: -webkit-flex;
-            flex-direction: column;
-            align-items: center;
-            line-height: 32px;
-        }
-
-        legend {
-            font-size: small;
-            color: #777;
-            margin-left: 10px;
-            margin-right: 10px;
-        }
-
-        fieldset div {
-            width: 100%;
-            display: flex;
-            display: -webkit-flex;
-            align-items: center;
-            line-height: 32px;
-        }
-
-        input[type="radio"] {
-            width: 20px;
-            margin-left: 20%;
-        }
-
-        fieldset label {
-            line-height: 32px;
-            padding-left: 5px;
-        }
-
-        .useSystemClock {
-            display: flex;
-            display: -webkit-flex;
-            margin-bottom: 5px;
-            align-items: center;
-            line-height: 32px;
-        }
-
-        .useSystemClock label {
-            width: 100%;
-            line-height: 32px;
-            padding-left: 5px;
-        }
-
-        #useSystemClock {
-            width: 20px;
-        }
-        
-        /* 新增样式：使四个选项并排显示 */
-        .instrument-options {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-        }
-        
-        .instrument-option {
-            width: 48%;
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-    </style>
-</head>
-
-<body>
-    <h3>进样时间</h3>
-    <div class="input">
-        <div>
-
-            <div class="useSystemClock">
-                <input type="checkbox" id="useSystemClock" checked>
-                <label for="useSystemClock">使用系统时间</label>
-            </div>
-
-            <div class="inputbox nowDate">
-                <label for="nowDate">设定当前日期</label>
-                <div>
-                    <input type="date" id="nowDate">
-                </div>
-            </div>
-            <div class="inputbox nowTime">
-                <label for="nowTime">设定当前时间</label>
-                <div>
-                    <input type="time" id="nowTime">
-                </div>
-            </div>
-
-            <div class="inputbox allId">
-                <label for="allId">样品总数</label>
-                <!-- 此处的 div 为解决 Safari 浏览器 align-items: baseline; 不对齐的问题 -->
-                <div>
-                    <input type="number" id="allId" inputmode="decimal" autocomplete="off">
-                </div>
-            </div>
-
-            <div class="inputbox time">
-                <label for="time">运行时间</label>
-                <div><input type="number" id="time" inputmode="decimal" autocomplete="off"></div>
-            </div>
-
-            <div class="inputbox nowId">
-                <label for="nowId">运行到第几针</label>
-                <div><input type="number" id="nowId" inputmode="decimal" autocomplete="off"></div>
-            </div>
-
-            <div class="inputbox nowRunTime">
-                <label for="nowRunTime">当前运行时间</label>
-                <div><input type="number" id="nowRunTime" inputmode="decimal" autocomplete="off"></div>
-            </div>
-
-            <div class="offset">
-                <input type="checkbox" id="offset" checked>
-                <label for="offset">时间补偿</label>
-            </div>
-
-            <div>
-                <fieldset class="offset_type">
-                    <legend>时间补偿 - 选择仪器</legend>
-
-                    <span style="font-size: small;">选择你使用的仪器，以确定时间补偿的力度。</span>
-
-                    <div class="instrument-options">
-                        <div class="instrument-option">
-                            <input type="radio" value="24" name="offset_type" id="shimadzu" checked>
-                            <label for="shimadzu">岛津</label>
-                        </div>
-
-                        <div class="instrument-option">
-                            <input type="radio" value="84" name="offset_type" id="agilent">
-                            <label for="agilent">安捷伦</label>
-                        </div>
-                        
-                        <div class="instrument-option">
-                            <input type="radio" value="30" name="offset_type" id="waters">
-                            <label for="waters">沃特世</label>
-                        </div>
-                        
-                        <div class="instrument-option">
-                            <input type="radio" value="30" name="offset_type" id="thermo">
-                            <label for="thermo">赛默飞</label>
-                        </div>
-                    </div>
-
-                </fieldset>
-            </div>
-
-        </div>
-        <br>
-        <div class="buttons">
-            <button id="new_page">新开标签页</button>
-            <button id="clear">清除内容</button>
-            <button id="ok">计算</button>
-        </div>
-        <br>
-    </div>
-    <div id="output"></div>
 </body>
 
 </html>
