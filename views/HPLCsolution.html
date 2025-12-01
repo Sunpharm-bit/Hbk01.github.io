@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>液相流动相量计算器</title>
+    <title>液相色谱流动相计算器</title>
     <style>
         * {
             box-sizing: border-box;
@@ -664,7 +664,7 @@
         </div>
         
         <div class="footer">
-            <p>液相流动相计算器 &copy; 2025 实验室工具</p>
+            <p>液相色谱流动相计算器 &copy; 2023 实验室工具</p>
             <p class="mobile-only" style="font-size: 11px; margin-top: 5px; opacity: 0.7;">专为移动端优化</p>
         </div>
     </div>
@@ -673,14 +673,53 @@
         // 预设梯度数据
         const presetGradients = {
             quick: {
-                name: "常用梯度",
+                name: "快速梯度",
                 steps: [
-                    {time: 0, A: 64, B: 36},
-                    {time: 25, A: 58, B: 42},
-                    {time: 40, A: 30, B: 70}
-                    {time: 45, A: 30, B: 70} 
-                    {time: 45.1, A: 64, B: 36} 
-                    {time: 50, A: 64, B: 36}
+                    {time: 0, A: 95, B: 5},
+                    {time: 5, A: 5, B: 95},
+                    {time: 10, A: 95, B: 5}
+                ]
+            },
+            linear: {
+                name: "线性梯度",
+                steps: [
+                    {time: 0, A: 95, B: 5},
+                    {time: 20, A: 5, B: 95},
+                    {time: 25, A: 5, B: 95},
+                    {time: 30, A: 95, B: 5}
+                ]
+            },
+            isocratic: {
+                name: "等度洗脱",
+                steps: [
+                    {time: 0, A: 80, B: 20},
+                    {time: 20, A: 80, B: 20}
+                ]
+            },
+            long: {
+                name: "长梯度",
+                steps: [
+                    {time: 0, A: 95, B: 5},
+                    {time: 30, A: 5, B: 95},
+                    {time: 35, A: 5, B: 95},
+                    {time: 40, A: 95, B: 5}
+                ]
+            },
+            shallow: {
+                name: "浅梯度",
+                steps: [
+                    {time: 0, A: 95, B: 5},
+                    {time: 30, A: 70, B: 30},
+                    {time: 35, A: 95, B: 5}
+                ]
+            },
+            step: {
+                name: "阶梯梯度",
+                steps: [
+                    {time: 0, A: 100, B: 0},
+                    {time: 5, A: 80, B: 20},
+                    {time: 10, A: 60, B: 40},
+                    {time: 15, A: 40, B: 60}
                 ]
             }
         };
