@@ -336,6 +336,22 @@
             </div>
         `;
 
+        // 获取当前HTML文件的目录路径
+        function getBasePath() {
+            const scriptPath = document.currentScript ? document.currentScript.src : '';
+            if (scriptPath) {
+                // 从script路径提取目录
+                return scriptPath.substring(0, scriptPath.lastIndexOf('/') + 1);
+            }
+            // 如果没有script标签，则使用文档URL
+            const docPath = window.location.href;
+            const lastSlashIndex = docPath.lastIndexOf('/');
+            if (lastSlashIndex !== -1) {
+                return docPath.substring(0, lastSlashIndex + 1);
+            }
+            return './'; // 默认当前目录
+        }
+
         // 加载色谱柱数据
         function loadColumnData() {
             $("#content").html(`
@@ -345,19 +361,28 @@
                 </div>
             `);
 
+            // 使用相对路径访问JSON文件
+            const jsonPath = "statics/info/column.json";
+            
             $.ajax({
-                url: "statics/info/column.json",
+                url: jsonPath,
                 dataType: "json",
                 success: function(data) {
                     columnsData = data;
                     initApp();
                 },
                 error: function(xhr, status, error) {
+                    console.error("加载JSON数据失败:", error);
+                    console.log("尝试加载的路径:", jsonPath);
+                    
                     $("#content").html(`
                         <div class="tips">
                             <i class="fas fa-exclamation-triangle"></i>
                             <h3>数据加载失败</h3>
-                            <p>无法加载色谱柱数据，请检查网络连接或联系管理员。</p>
+                            <p>无法加载色谱柱数据，请检查以下问题：</p>
+                            <p>1. 确保 statics/info/column.json 文件存在</p>
+                            <p>2. 检查JSON文件格式是否正确</p>
+                            <p>3. 确认网络连接正常</p>
                             <p>错误信息: ${error}</p>
                             <button id="retry-btn" style="margin-top: 15px; padding: 8px 20px; background: var(--primary-color); color: white; border: none; border-radius: var(--border-radius); cursor: pointer;">重新加载</button>
                         </div>
