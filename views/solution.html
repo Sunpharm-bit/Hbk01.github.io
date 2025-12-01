@@ -579,8 +579,7 @@
             };
             
             // 添加初始行
-            addFlaskRow(10, "25");  // 示例：10个25ml
-            addFlaskRow(20, "100"); // 示例：20个100ml
+            addFlaskRow(10, "100");  // 示例：10个100ml
             
             // 添加新行
             addFlaskBtn.addEventListener('click', function() {
@@ -590,8 +589,7 @@
             // 重置按钮
             resetBtn.addEventListener('click', function() {
                 flaskContainer.innerHTML = '';
-                addFlaskRow(10, "25");
-                addFlaskRow(20, "100");
+                addFlaskRow(10, "100");
                 document.getElementById('rinseCheck').checked = true;
                 safetyFactorRange.value = 10;
                 safetyFactorValue.textContent = '10%';
