@@ -160,6 +160,9 @@
             min-height: 350px;
             transition: var(--transition);
             margin-bottom: 20px;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
         }
 
         .tips {
@@ -209,6 +212,7 @@
             padding-bottom: 10px;
             border-bottom: 1px solid var(--border-color);
             font-size: 1.4rem;
+            overflow-wrap: break-word;
         }
 
         .detail-item {
@@ -241,6 +245,9 @@
 
         .detail-value {
             flex: 1;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
         }
 
         .column-list {
@@ -262,6 +269,9 @@
             transition: var(--transition);
             cursor: pointer;
             touch-action: manipulation;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
         }
 
         .column-card:hover, .column-card:active {
@@ -281,12 +291,30 @@
             margin-bottom: 8px;
             color: var(--primary-dark);
             font-size: 1.2rem;
+            overflow-wrap: break-word;
         }
 
         .column-card p {
             margin-bottom: 4px;
             color: var(--secondary-color);
             font-size: 0.95rem;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+
+        /* 特别为编号添加的样式，防止溢出 */
+        .column-id {
+            display: inline;
+            font-family: monospace;
+            background-color: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: pre-wrap;
         }
 
         .back-btn {
@@ -365,6 +393,12 @@
                 font-size: 0.9rem;
             }
             
+            .column-id {
+                font-size: 0.85rem;
+                display: block;
+                margin-top: 2px;
+            }
+            
             .back-btn {
                 padding: 8px 16px;
                 font-size: 0.95rem;
@@ -385,6 +419,10 @@
             
             .column-list {
                 grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .column-id {
+                font-size: 0.9rem;
             }
         }
 
@@ -432,6 +470,27 @@
                 <p>请从上方选择色谱柱类型和具体型号</p>
             </div>
         `;
+
+        // 格式化编号，确保在移动端正确显示
+        function formatColumnId(id) {
+            // 将逗号分隔的编号转换为更易读的格式
+            const ids = id.split(',');
+            if (ids.length <= 3) {
+                // 如果编号较少，保持原样
+                return `<span class="column-id">${id}</span>`;
+            } else {
+                // 如果编号较多，进行分组显示
+                let result = '';
+                for (let i = 0; i < ids.length; i += 3) {
+                    const group = ids.slice(i, i + 3).join(',');
+                    result += `<span class="column-id">${group}</span>`;
+                    if (i + 3 < ids.length) {
+                        result += '<br>';
+                    }
+                }
+                return result;
+            }
+        }
 
         // 加载色谱柱数据
         function loadColumnData() {
@@ -518,7 +577,7 @@
                     html += `
                         <div class="column-card ${currentType}" data-id="${column.id}">
                             <h3>${column.model}</h3>
-                            <p><strong>编号:</strong> ${column.id}</p>
+                            <p><strong>编号:</strong> ${formatColumnId(column.id)}</p>
                             <p><strong>规格:</strong> ${column.specification}</p>
                             <p><strong>描述:</strong> ${column.description}</p>
                         </div>
@@ -545,7 +604,7 @@
                         <h2>${column.model} 色谱柱详情</h2>
                         <div class="detail-item">
                             <div class="detail-label">编号</div>
-                            <div class="detail-value">${column.id}</div>
+                            <div class="detail-value">${formatColumnId(column.id)}</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">型号</div>
